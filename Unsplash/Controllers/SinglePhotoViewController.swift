@@ -69,13 +69,15 @@ class SinglePhotoViewController: UIViewController {
     private var likeButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage(systemName: "heart.circle"), for: .normal)
-        button.tintColor = .white
+        button.setImage(UIImage(systemName: "heart"), for: .normal)
+        button.contentMode = .scaleAspectFit
+        button.tintColor = .lightGray
+        button.backgroundColor = .white
         button.contentVerticalAlignment = .fill
         button.contentHorizontalAlignment = .fill
-        button.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        button.imageEdgeInsets = UIEdgeInsets(top: 15, left: 6.5, bottom: 15, right: 13.5)
         button.layer.cornerRadius = 36
-        button.addTarget(self, action: #selector(likePhoto), for: .touchUpInside)
+        button.addTarget(self, action: #selector(likeButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -93,7 +95,19 @@ class SinglePhotoViewController: UIViewController {
         }
     }
     
-    private var photo: SinglePhoto?
+    private var photo: UnsplashPhoto? {
+        didSet {
+            DispatchQueue.main.async {
+                if self.photo?.likedByUser == true {
+                    self.likeButton.setImage(UIImage(systemName: "heart.fill"), for: .normal)
+                    self.likeButton.tintColor = .systemPink
+                } else {
+                    self.likeButton.setImage(UIImage(systemName: "heart"), for: .normal)
+                    self.likeButton.tintColor = .lightGray
+                }
+            }
+        }
+    }
     
     private var photoViewModel: SinglePhotoViewModel? {
         didSet {
@@ -107,6 +121,7 @@ class SinglePhotoViewController: UIViewController {
         super.viewDidLoad()
 
         view.backgroundColor = .lightGray
+    
     }
    
     private func setPhoto() {
@@ -201,20 +216,29 @@ class SinglePhotoViewController: UIViewController {
         }
     }
     
-    @objc func likePhoto() {
+    @objc func likeButtonTapped() {
+        guard let id = photoID else { return }
         guard let photo = photo else { return }
-        NetworkManager.shared.likePhoto(photo: photo) { result in
-            switch result {
-            case .success(let photo):
-                print("Is photo liked by user: \(photo[0].likedByUser)")
-                DispatchQueue.main.async {
-                    self.likeButton.setImage(UIImage(systemName: "heart.fill"), for: .normal)
+        if photo.likedByUser == false {
+            NetworkManager.shared.likePhoto(id: id) { result in
+                switch result {
+                case .success(let result):
+                    self.photo = result.photo
+                case .failure(let error):
+                    print(error.localizedDescription)
                 }
-            case .failure(let error):
-                print("Error while liking a photo occured: \(error.localizedDescription)")
+            }
+        } else {
+            NetworkManager.shared.unlikePhoto(id: id) { result in
+                switch result {
+                case .success(let result):
+                    self.photo = result.photo
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
             }
         }
     }
-
+    
 }
 

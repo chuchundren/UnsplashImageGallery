@@ -10,13 +10,13 @@ import Foundation
 
 struct SinglePhotoViewModel {
     
-    private var photo: SinglePhoto
+    private var photo: UnsplashPhoto
     
-    init(with photo: SinglePhoto) {
+    init(with photo: UnsplashPhoto) {
         self.photo = photo
     }
     
-    public var username: String { photo.user.username }
+    public var username: String { photo.user?.username ?? "" }
     
     public var creationDate: String {
         let dateFormatter = DateFormatter()
@@ -43,7 +43,7 @@ struct SinglePhotoViewModel {
     }
     
     public var profilePhotoURL: URL? {
-        guard let url = URL(string: photo.user.profileImage.small) else { return nil}
+        guard let url = URL(string: photo.user?.profileImage.small ?? "") else { return nil}
         return url
     }
     

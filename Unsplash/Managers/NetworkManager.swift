@@ -61,14 +61,14 @@ class NetworkManager {
         task.resume()
     }
     
-    public func getPhoto(id: String, completion:@escaping (Result<SinglePhoto, Error>) -> Void) {
+    public func getPhoto(id: String, completion:@escaping (Result<UnsplashPhoto, Error>) -> Void) {
         guard let request = createRequest(with: URL(string: "\(baseURL)/photos/\(id)"), type: .GET) else { return }
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
                 return
             }
             do {
-                let result = try self.decoder.decode(SinglePhoto.self, from: data)
+                let result = try self.decoder.decode(UnsplashPhoto.self, from: data)
                 completion(.success(result))
             } catch {
                 completion(.failure(error))
@@ -129,30 +129,46 @@ class NetworkManager {
     
     
     // FIXME: - not every photo is liked, I get an error more often, probably because of the reques body. Also, I'm not quite sure if I need completion block in uploadTask at all
-    public func likePhoto(photo: SinglePhoto, completion: @escaping (Result<[UnsplashPhoto], Error>) -> Void) {
-        do {
-            guard let request = createRequest(with: URL(string: "\(baseURL)/photos/\(photo.id)/like"), type: .POST) else { return }
-                let body = try JSONEncoder().encode(photo)
-                let task = URLSession.shared.uploadTask(with: request, from: body) { data, response, error in
-                    guard let data = data, error == nil else { return }
-                    do {
-                        //let result = try self.decoder.decode([UnsplashPhotoResponse].self, from: data)
-                        let json = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
-                        print(json)
-                        //completion(.success(result))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                }
-                task.resume()
-        } catch {
-            completion(.failure(error))
+    public func likePhoto(id: String, completion: @escaping (Result<LikeResponse, Error>) -> Void) {
+        guard let request = createRequest(with: URL(string: "\(baseURL)/photos/\(id)/like"), type: .POST) else {
+            return
         }
+        let jsonBody = ["id": id]
+        let body = try? JSONSerialization.data(withJSONObject: jsonBody, options: .fragmentsAllowed)
+        let task = URLSession.shared.uploadTask(with: request, from: body) { data, response, error in
+            guard let data = data, error == nil else { return }
+            do {
+                let result = try self.decoder.decode(LikeResponse.self, from: data)
+                completion(.success(result))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        task.resume()
     }
     
     // TODO: - create delete request to unlike a photo
-    public func unlikePhoto(id: String, completion: @escaping (URLRequest) -> Void) {
-
+    public func unlikePhoto(id: String, completion: @escaping (Result<LikeResponse, Error>) -> Void) {
+        guard let request = createRequest(with: URL(string: "\(baseURL)/photos/\(id)/like"), type: .DELETE) else {
+            return
+        }
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else { return }
+            guard let response = response as? HTTPURLResponse, (200 ..< 299) ~= response.statusCode else {
+                print("Error: HTTP request failed")
+                completion(.failure(error as! Error))
+                return
+            }
+            print(response)
+            print("DATA IS: \(data)")
+            do {
+                let result = try self.decoder.decode(LikeResponse.self, from: data)
+                completion(.success(result))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        task.resume()
     }
     
     private func createRequest(with url: URL?, type: HTTPMethod) -> URLRequest? {
@@ -166,6 +182,7 @@ class NetworkManager {
         } else {
             request.setValue("Client-ID \(apiKey)", forHTTPHeaderField: "Authorization")
         }
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 30
         
         return request

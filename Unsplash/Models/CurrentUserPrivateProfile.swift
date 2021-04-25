@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 struct CurrentUserPrivateProfile: Codable {
     let id: String
     let username: String
@@ -21,6 +20,7 @@ struct CurrentUserPrivateProfile: Codable {
     let followedByUser: Bool
     let email: String
     let links: UserLinks
+    let profileImage: ProfileImage
 }
 
 struct UserLinks: Codable {
