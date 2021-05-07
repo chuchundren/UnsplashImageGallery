@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B0B8139263ADC0D008F931C /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B0B8138263ADC0D008F931C /* Route.swift */; };
 		4B0D04602628932E000D192D /* CurrentUserPrivateProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B0D045F2628932E000D192D /* CurrentUserPrivateProfile.swift */; };
 		4B4343DA2631F6E20035848D /* UnsplashPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4343D92631F6E20035848D /* UnsplashPhoto.swift */; };
 		4B4343DE2632C56F0035848D /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4343DD2632C56F0035848D /* ProfileHeaderView.swift */; };
@@ -34,6 +35,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4B0B8138263ADC0D008F931C /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
 		4B0D045F2628932E000D192D /* CurrentUserPrivateProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentUserPrivateProfile.swift; sourceTree = "<group>"; };
 		4B4343D92631F6E20035848D /* UnsplashPhoto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnsplashPhoto.swift; sourceTree = "<group>"; };
 		4B4343DD2632C56F0035848D /* ProfileHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileHeaderView.swift; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				4BE118F9261791FE00D8D22E /* NetworkManager.swift */,
+				4B0B8138263ADC0D008F931C /* Route.swift */,
 				4BBC73CF26270F380085C05B /* AuthManager.swift */,
 			);
 			path = Managers;
@@ -256,6 +259,7 @@
 				4BBC73D3262710180085C05B /* AuthResponse.swift in Sources */,
 				4B4343DA2631F6E20035848D /* UnsplashPhoto.swift in Sources */,
 				4B4343DE2632C56F0035848D /* ProfileHeaderView.swift in Sources */,
+				4B0B8139263ADC0D008F931C /* Route.swift in Sources */,
 				4BE6E0A92617675D00AB64BF /* FeedViewController.swift in Sources */,
 				4B4343E22632EA450035848D /* CurrentUserPrivateProfileViewModel.swift in Sources */,
 				4BE6E0C0261767E900AB64BF /* ProfileViewController.swift in Sources */,

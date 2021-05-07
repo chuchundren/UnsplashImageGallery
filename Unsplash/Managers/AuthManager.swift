@@ -7,22 +7,21 @@
 
 import Foundation
 
+struct Constants {
+    static let clientID = "lSXj4TBY1EdaoE5GriAhHAAsfPalz5G7RBofQdLYlbY"
+    static let clientSecret = "_hcFhxwFalfEkrSzqLJrXt6QM5zVP_2Z9SNCwokqckU"
+    static let tokenAPIURL = "https://unsplash.com/oauth/token"
+    static let scopes = ["public", "read_user", "write_user", "read_photos", "write_photos", "write_likes", "write_followers", "read_collections", "write_collections"].joined(separator: "+")
+}
 
 class AuthManager {
     
     static let shared = AuthManager()
     
-    struct Constants {
-        static let clientID = "lSXj4TBY1EdaoE5GriAhHAAsfPalz5G7RBofQdLYlbY"
-        static let clientSecret = "_hcFhxwFalfEkrSzqLJrXt6QM5zVP_2Z9SNCwokqckU"
-        static let tokenAPIURL = "https://unsplash.com/oauth/token"
-        static let scopes = ["public", "read_user", "write_user", "read_photos", "write_photos", "write_likes", "write_followers", "read_collections", "write_collections"].joined(separator: "+")
-    }
-    
     public var signInURL: URL? {
         let base = "https://unsplash.com/oauth/authorize"
         let redirectURI = "urn:ietf:wg:oauth:2.0:oob"
-        let string = "\(base)?client_id=\(AuthManager.Constants.clientID)&redirect_uri=\(redirectURI)&response_type=code&scope=\(Constants.scopes)"
+        let string = "\(base)?client_id=\(Constants.clientID)&redirect_uri=\(redirectURI)&response_type=code&scope=\(Constants.scopes)"
         return URL(string: string)
     }
     
@@ -70,7 +69,6 @@ class AuthManager {
         }
         task.resume()
     }
-    
     
     private func cacheToken(result: AuthResponse) {
         UserDefaults.standard.setValue(result.access_token, forKey: "access_token")

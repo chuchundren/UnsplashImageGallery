@@ -69,14 +69,13 @@ class SinglePhotoViewController: UIViewController {
     private var likeButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage(systemName: "heart"), for: .normal)
+        let image = UIImage(systemName: "heart.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 28))
+        button.setImage(image, for: .normal)
         button.contentMode = .scaleAspectFit
         button.tintColor = .lightGray
         button.backgroundColor = .white
-        button.contentVerticalAlignment = .fill
-        button.contentHorizontalAlignment = .fill
-        button.imageEdgeInsets = UIEdgeInsets(top: 15, left: 6.5, bottom: 15, right: 13.5)
-        button.layer.cornerRadius = 36
+        button.layer.cornerRadius = 26
+        button.layer.opacity = 0.5
         button.addTarget(self, action: #selector(likeButtonTapped), for: .touchUpInside)
         return button
     }()
@@ -92,20 +91,6 @@ class SinglePhotoViewController: UIViewController {
     public var photoID: String? {
         didSet {
             fetchSinglePhoto()
-        }
-    }
-    
-    private var photo: UnsplashPhoto? {
-        didSet {
-            DispatchQueue.main.async {
-                if self.photo?.likedByUser == true {
-                    self.likeButton.setImage(UIImage(systemName: "heart.fill"), for: .normal)
-                    self.likeButton.tintColor = .systemPink
-                } else {
-                    self.likeButton.setImage(UIImage(systemName: "heart"), for: .normal)
-                    self.likeButton.tintColor = .lightGray
-                }
-            }
         }
     }
     
@@ -135,10 +120,18 @@ class SinglePhotoViewController: UIViewController {
         locationLabel.text = viewModel.location
         descriptionLabel.text = viewModel.photoDescription
         
+        if viewModel.likedByUser == true {
+            self.likeButton.tintColor = .systemPink
+        } else {
+            self.likeButton.tintColor = .lightGray
+        }
+        
         setupViews(aspectRatio: CGFloat(viewModel.aspectRatio))
     }
     
     private func setupViews(aspectRatio: CGFloat) {
+        let likeButtonPosition = view.bounds.width / aspectRatio + 20
+        
         view.addSubview(scrollView)
         view.addSubview(likeButton)
         
@@ -165,7 +158,7 @@ class SinglePhotoViewController: UIViewController {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            
+            contentView.heightAnchor.constraint(equalTo: view.heightAnchor),
             contentView.widthAnchor.constraint(equalTo: view.widthAnchor),
             
             photoImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
@@ -193,48 +186,67 @@ class SinglePhotoViewController: UIViewController {
             descriptionLabel.leadingAnchor.constraint(equalTo: userProfilePhotoImageView.leadingAnchor),
             descriptionLabel.trailingAnchor.constraint(equalTo: usernameLabel.trailingAnchor),
             descriptionLabel.topAnchor.constraint(equalTo: userProfilePhotoImageView.bottomAnchor, constant: 8),
-            descriptionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -200),
             
             likeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            likeButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100),
-            likeButton.widthAnchor.constraint(equalToConstant: 72),
-            likeButton.heightAnchor.constraint(equalToConstant: 72)
+            likeButton.topAnchor.constraint(equalTo: view.topAnchor, constant: likeButtonPosition),
+            likeButton.widthAnchor.constraint(equalToConstant: 52),
+            likeButton.heightAnchor.constraint(equalToConstant: 52)
         ])
     }
     
     private func fetchSinglePhoto() {
         guard let id = photoID else { return }
-        NetworkManager.shared.getPhoto(id: id) { result in
+        NetworkManager.shared.loadSingleObject(with: Route.photo(id: id)) { (result: Result<UnsplashPhoto, Error>) in
             switch result {
             case .success(let photo):
                 let viewModel = SinglePhotoViewModel(with: photo)
-                self.photo = photo
                 self.photoViewModel = viewModel
             case .failure(let error):
-                print(error)
+                print(error.localizedDescription, error)
             }
         }
+        
+        
     }
     
     @objc func likeButtonTapped() {
+        DispatchQueue.main.async {
+            UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut], animations: {
+                self.likeButton.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+                self.likeButton.layer.opacity = 1
+            }, completion: { _ in
+                UIView.animate(withDuration:0.1) {
+                    self.likeButton.transform = CGAffineTransform(scaleX: 1, y: 1)
+                    self.likeButton.layer.opacity = 0.5
+                }
+            })
+        }
         guard let id = photoID else { return }
-        guard let photo = photo else { return }
-        if photo.likedByUser == false {
-            NetworkManager.shared.likePhoto(id: id) { result in
+        guard let viewModel = photoViewModel else { return }
+        if viewModel.likedByUser == false {
+            NetworkManager.shared.loadSingleObject(with: Route.likePhoto(id: id)) { (result: Result<LikeResponse, Error>) in
                 switch result {
-                case .success(let result):
-                    self.photo = result.photo
+                case .success(let response):
+                    guard let photo = response.photo else {
+                        return
+                    }
+                    let viewModel = SinglePhotoViewModel(with: photo)
+                    self.photoViewModel = viewModel
                 case .failure(let error):
-                    print(error.localizedDescription)
+                    print(error.localizedDescription, error)
                 }
             }
         } else {
-            NetworkManager.shared.unlikePhoto(id: id) { result in
+            NetworkManager.shared.loadSingleObject(with: Route.unlikePhoto(id: id)) { (result: Result<LikeResponse, Error>) in
                 switch result {
-                case .success(let result):
-                    self.photo = result.photo
+                case .success(let response):
+                    guard let photo = response.photo else {
+                        return
+                    }
+                    let viewModel = SinglePhotoViewModel(with: photo)
+                    self.photoViewModel = viewModel
                 case .failure(let error):
-                    print(error.localizedDescription)
+                    print(error.localizedDescription, error)
                 }
             }
         }

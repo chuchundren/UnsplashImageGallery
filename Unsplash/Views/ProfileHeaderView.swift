@@ -7,9 +7,16 @@
 
 import UIKit
 
+protocol ProfileHeaderViewDelegate: AnyObject {
+    func didChangeSegmentedControlValue(_ header: ProfileHeaderView, for value: Int)
+}
+
+
 class ProfileHeaderView: UICollectionReusableView {
     
     static let identifier = "ProfileHeaderView"
+    
+    weak var delegate: ProfileHeaderViewDelegate?
     
     private var profileImageView: UIImageView = {
         let imageView = UIImageView()
@@ -50,6 +57,15 @@ class ProfileHeaderView: UICollectionReusableView {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
+    private var segmentedControl: UISegmentedControl = {
+        let control = UISegmentedControl(items: ["User's photos", "Liked photos"])
+        control.selectedSegmentTintColor = .black
+        control.selectedSegmentIndex = 1
+        control.translatesAutoresizingMaskIntoConstraints = false
+        control.addTarget(self, action: #selector(segmentedControlValueChanged), for: .valueChanged)
+        return control
+    }()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -69,6 +85,7 @@ class ProfileHeaderView: UICollectionReusableView {
         addSubview(usernameLabel)
         addSubview(locationLabel)
         addSubview(bioLabel)
+        addSubview(segmentedControl)
         
         NSLayoutConstraint.activate([
             profileImageView.topAnchor.constraint(equalTo: self.topAnchor, constant: 20),
@@ -90,7 +107,11 @@ class ProfileHeaderView: UICollectionReusableView {
             
             bioLabel.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 8),
             bioLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
-            bioLabel.trailingAnchor.constraint(equalTo: nameLabel.trailingAnchor)
+            bioLabel.trailingAnchor.constraint(equalTo: nameLabel.trailingAnchor),
+            
+            segmentedControl.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16),
+            segmentedControl.trailingAnchor.constraint(equalTo: nameLabel.trailingAnchor),
+            segmentedControl.topAnchor.constraint(equalTo: bioLabel.bottomAnchor, constant: 8)
         ])
     }
     
@@ -99,5 +120,9 @@ class ProfileHeaderView: UICollectionReusableView {
         usernameLabel.text = viewModel.username
         bioLabel.text = viewModel.bio
         locationLabel.text = viewModel.location
+    }
+    
+    @objc private func segmentedControlValueChanged() {
+        delegate?.didChangeSegmentedControlValue(self, for: segmentedControl.selectedSegmentIndex)
     }
 }

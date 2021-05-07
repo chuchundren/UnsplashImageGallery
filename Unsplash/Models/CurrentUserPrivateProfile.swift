@@ -15,12 +15,12 @@ struct CurrentUserPrivateProfile: Codable {
     let portfolioUrl: String?
     let bio: String?
     let location: String?
-    let totalLikes: Int
-    let totalPhotos: Int
-    let followedByUser: Bool
+    let totalLikes: Int?
+    let totalPhotos: Int?
+    let followedByUser: Bool?
     let email: String
     let links: UserLinks
-    let profileImage: ProfileImage
+    let profileImage: ProfileImage?
 }
 
 struct UserLinks: Codable {

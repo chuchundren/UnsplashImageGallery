@@ -16,7 +16,9 @@ struct SinglePhotoViewModel {
         self.photo = photo
     }
     
-    public var username: String { photo.user?.username ?? "" }
+    public var likedByUser: Bool { photo.likedByUser }
+    
+    public var username: String { photo.user.username }
     
     public var creationDate: String {
         let dateFormatter = DateFormatter()
@@ -43,7 +45,7 @@ struct SinglePhotoViewModel {
     }
     
     public var profilePhotoURL: URL? {
-        guard let url = URL(string: photo.user?.profileImage.small ?? "") else { return nil}
+        guard let url = URL(string: photo.user.profileImage?.small ?? "") else { return nil}
         return url
     }
     

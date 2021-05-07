@@ -52,24 +52,23 @@ class ProfileViewController: UIViewController {
     }
     
     private func getUser() {
-        NetworkManager.shared.getCurrentUserProfile { result in
+        NetworkManager.shared.loadSingleObject(with: Route.currentUser) { (result: Result<CurrentUserPrivateProfile, Error>) in
             switch result {
             case .success(let user):
                 self.viewModel = CurrentUserPrivateProfileViewModel(currentUser: user)
-                NetworkManager.shared.getUsersLikedPhotos(user.username) { result in
-                    switch result {
-                    case .success(let photos):
-                        self.photos = photos
+                NetworkManager.shared.loadAnArray(with: Route.usersLikedPhotos(username: user.username)) { (photoResult: Result<[UnsplashPhoto], Error>) in
+                    switch photoResult {
+                    case .success(let response):
+                        self.photos = response
                     case .failure(let error):
-                        print(error.localizedDescription)
+                        print(error)
                     }
                 }
             case .failure(let error):
-                print("Error occured: \(error.localizedDescription)")
+                print("Error occured: \(error.localizedDescription), \(error)")
             }
         }
     }
-    
 }
 
 extension ProfileViewController: UICollectionViewDataSource, UICollectionViewDelegate {
@@ -98,11 +97,20 @@ extension ProfileViewController: UICollectionViewDataSource, UICollectionViewDel
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        guard let view = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: ProfileHeaderView.identifier, for: indexPath) as? ProfileHeaderView else { fatalError() }
-        if let viewModel = viewModel {
-            view.configure(with: viewModel)
+        guard let header = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: ProfileHeaderView.identifier, for: indexPath) as? ProfileHeaderView else { fatalError("Couldn't dequeue a header view")
         }
-        return view
+        if let viewModel = viewModel {
+            header.configure(with: viewModel)
+        }
+        header.delegate = self
+        return header
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        let vc = SinglePhotoViewController()
+        vc.photoID = photos?[indexPath.item].id
+        navigationController?.pushViewController(vc, animated: true)
     }
     
 }
@@ -119,5 +127,11 @@ extension ProfileViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return 0
+    }
+}
+
+extension ProfileViewController: ProfileHeaderViewDelegate {
+    func didChangeSegmentedControlValue(_ header: ProfileHeaderView, for value: Int) {
+        print(value)
     }
 }

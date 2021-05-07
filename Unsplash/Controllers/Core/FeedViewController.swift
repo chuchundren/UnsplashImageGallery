@@ -34,12 +34,12 @@ class FeedViewController: UIViewController {
     }
     
     func fetchListPhotos() {
-        NetworkManager.shared.getListPhotos { result in
+        NetworkManager.shared.loadAnArray(with: Route.listPhotos) { (result: Result<[UnsplashPhoto], Error>) in
             switch result {
             case .success(let response):
                 self.photoResponse = response
             case .failure(let error):
-                print("Error fetching data: \(error.localizedDescription)")
+                print(error)
             }
         }
     }

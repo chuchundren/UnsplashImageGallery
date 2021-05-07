@@ -64,7 +64,7 @@ class ExploreCollectionViewCell: UICollectionViewCell {
         let representedIdentifier = photo.id
         self.representedIdentifier = representedIdentifier
         
-        authorNameLabel.text = photo.user?.username ?? ""
+        authorNameLabel.text = photo.user.username
         
         if self.representedIdentifier == representedIdentifier {
             guard let url = URL(string: photo.urls.regular) else { return }

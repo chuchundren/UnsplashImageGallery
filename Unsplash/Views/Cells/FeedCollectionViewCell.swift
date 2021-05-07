@@ -83,13 +83,13 @@ class FeedCollectionViewCell: UICollectionViewCell {
         let representedIdentifier = photo.id
         self.representedIdentifier = representedIdentifier
         
-        usernameLabel.text = photo.user?.username ?? ""
+        usernameLabel.text = photo.user.username
         
         if self.representedIdentifier == representedIdentifier {
             guard let url = URL(string: photo.urls.small) else { return }
             photoImageView.load(url: url)
             
-            guard let avatarURL = URL(string: photo.user?.profileImage.small ?? "") else { return }
+            guard let avatarURL = URL(string: photo.user.profileImage?.small ?? "") else { return }
             userProfilePhotoImageView.load(url: avatarURL)
         }
         

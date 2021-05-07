@@ -8,5 +8,5 @@
 import Foundation
 
 struct LikeResponse: Codable {
-    var photo: UnsplashPhoto
+    var photo: UnsplashPhoto?
 }

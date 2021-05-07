@@ -53,12 +53,12 @@ class ExploreViewController: UIViewController {
     }
     
     func fetchListPhotos() {
-        NetworkManager.shared.getListPhotos { result in
+        NetworkManager.shared.loadAnArray(with: Route.listPhotos) { (result: Result<[UnsplashPhoto], Error>) in
             switch result {
             case .success(let response):
                 self.photoResponse = response
             case .failure(let error):
-                print("Error fetching data: \(error.localizedDescription)")
+                print(error)
             }
         }
     }
@@ -81,6 +81,13 @@ extension ExploreViewController: UICollectionViewDataSource, UICollectionViewDel
         cell.configure(with: photo[indexPath.item])
         
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        let vc = SinglePhotoViewController()
+        vc.photoID = photoResponse?[indexPath.item].id
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
@@ -111,12 +118,12 @@ extension ExploreViewController: LayoutDelegate {
 extension ExploreViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let searchText = searchBar.text else { return }
-        NetworkManager.shared.getSearchedPhotos(for: searchText) { result in
+        NetworkManager.shared.loadSingleObject(with: Route.searchedPhotos(searchText: searchText)) { (result: Result<SearchedPhotosResponse, Error>) in
             switch result {
             case .success(let response):
                 self.photoResponse = response.results
             case .failure(let error):
-                print("Error while searching photos occurred: \(error.localizedDescription)")
+                print("Error while searching photos occurred: \(error.localizedDescription), \(error)")
             }
         }
     }
