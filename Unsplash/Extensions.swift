@@ -20,4 +20,15 @@ extension UIImageView {
             }
         }
     }
+    
+    func image(from data: Data?) {
+        DispatchQueue.main.async {
+            if let data = data {
+                self.image = UIImage(data: data)
+            } else {
+                self.image = UIImage(systemName: "photo")
+            }
+        }
+    }
+    
 }

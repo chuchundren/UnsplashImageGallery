@@ -75,6 +75,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4B40B1CC2645D09300C3EB8E /* Other */ = {
+			isa = PBXGroup;
+			children = (
+				4BBC73D526271A740085C05B /* AuthViewController.swift */,
+				4B9FC2A22629CB20002EA151 /* SinglePhotoViewController.swift */,
+			);
+			path = Other;
+			sourceTree = "<group>";
+		};
 		4B4B2FE5262DF5E00081EA88 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
@@ -165,8 +174,7 @@
 			isa = PBXGroup;
 			children = (
 				4B9FC2A12629CAFB002EA151 /* Core */,
-				4BBC73D526271A740085C05B /* AuthViewController.swift */,
-				4B9FC2A22629CB20002EA151 /* SinglePhotoViewController.swift */,
+				4B40B1CC2645D09300C3EB8E /* Other */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";

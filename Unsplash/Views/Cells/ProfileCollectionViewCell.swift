@@ -43,4 +43,16 @@ class ProfileCollectionViewCell: UICollectionViewCell {
         ])
     }
     
+    func configure(with photo: UnsplashPhoto) {
+        let representedIdentifier = photo.id
+        self.representedIdentifier = representedIdentifier
+        
+        if self.representedIdentifier == representedIdentifier {
+            guard let url = URL(string: photo.urls.small) else { return }
+            NetworkManager.shared.downloadAnImage(imageURL: url) { data, error in
+                self.imageView.image(from: data)
+            }
+        }
+    }
+    
 }

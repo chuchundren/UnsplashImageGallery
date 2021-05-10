@@ -77,27 +77,23 @@ extension ProfileViewController: UICollectionViewDataSource, UICollectionViewDel
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ProfileCollectionViewCell.identifier, for: indexPath) as? ProfileCollectionViewCell else {
-            return UICollectionViewCell()
+        guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: ProfileCollectionViewCell.identifier,
+                for: indexPath) as? ProfileCollectionViewCell else {
+            fatalError("Couldn't dequeue a cell")
         }
         guard let photo = photos?[indexPath.item] else {
             return UICollectionViewCell()
         }
-        guard let url = URL(string: photo.urls.regular) else {
-            return UICollectionViewCell()
-        }
-        
-        let representedIdentifier = photo.id
-        cell.representedIdentifier = representedIdentifier
-        
-        if cell.representedIdentifier == representedIdentifier {
-            cell.imageView.load(url: url)
-        }
+        cell.configure(with: photo)
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        guard let header = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: ProfileHeaderView.identifier, for: indexPath) as? ProfileHeaderView else { fatalError("Couldn't dequeue a header view")
+        guard let header = collectionView.dequeueReusableSupplementaryView(
+                ofKind: UICollectionView.elementKindSectionHeader,
+                withReuseIdentifier: ProfileHeaderView.identifier, for: indexPath) as? ProfileHeaderView else {
+            fatalError("Couldn't dequeue a header view")
         }
         if let viewModel = viewModel {
             header.configure(with: viewModel)

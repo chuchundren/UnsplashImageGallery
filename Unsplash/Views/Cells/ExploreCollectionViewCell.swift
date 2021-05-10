@@ -68,7 +68,9 @@ class ExploreCollectionViewCell: UICollectionViewCell {
         
         if self.representedIdentifier == representedIdentifier {
             guard let url = URL(string: photo.urls.regular) else { return }
-            photoImageView.load(url: url)
+            NetworkManager.shared.downloadAnImage(imageURL: url) { data, error in
+                self.photoImageView.image(from: data)
+            }
         }
         setupConstraints()
         contentView.backgroundColor = .clear

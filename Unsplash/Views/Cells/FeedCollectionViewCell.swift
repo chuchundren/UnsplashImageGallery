@@ -87,10 +87,14 @@ class FeedCollectionViewCell: UICollectionViewCell {
         
         if self.representedIdentifier == representedIdentifier {
             guard let url = URL(string: photo.urls.small) else { return }
-            photoImageView.load(url: url)
-            
+            NetworkManager.shared.downloadAnImage(imageURL: url) { data, error in
+                self.photoImageView.image(from: data)
+            }
+    
             guard let avatarURL = URL(string: photo.user.profileImage?.small ?? "") else { return }
-            userProfilePhotoImageView.load(url: avatarURL)
+            NetworkManager.shared.downloadAnImage(imageURL: avatarURL) { data, error in
+                self.userProfilePhotoImageView.image(from: data)
+            }
         }
         
         contentView.backgroundColor = .clear

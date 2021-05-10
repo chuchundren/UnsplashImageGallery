@@ -110,11 +110,17 @@ class SinglePhotoViewController: UIViewController {
     }
    
     private func setPhoto() {
-        guard let viewModel = photoViewModel else {
+        guard let viewModel = photoViewModel,
+              let imageURL = viewModel.photoURL,
+              let profileURL = viewModel.profilePhotoURL else {
             return
         }
-        photoImageView.load(url: viewModel.photoURL)
-        userProfilePhotoImageView.load(url: viewModel.profilePhotoURL)
+        NetworkManager.shared.downloadAnImage(imageURL: imageURL) { data, error in
+            self.photoImageView.image(from: data)
+        }
+        NetworkManager.shared.downloadAnImage(imageURL: profileURL) { data, error in
+            self.userProfilePhotoImageView.image(from: data)
+        }
         usernameLabel.text = viewModel.username
         creationDateLabel.text = viewModel.creationDate
         locationLabel.text = viewModel.location

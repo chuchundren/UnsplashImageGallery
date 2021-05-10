@@ -57,6 +57,7 @@ class AuthViewController: UIViewController {
     }
     
     @objc func didTapSignIn() {
+        toggleSignInButton()
         completionHandler = { [weak self] success in
             DispatchQueue.main.async {
                 self?.handleSignIn(success)
@@ -78,6 +79,17 @@ class AuthViewController: UIViewController {
         let mainTabBarVC = TabBarViewController()
         mainTabBarVC.modalPresentationStyle = .fullScreen
         present(mainTabBarVC, animated: true)
+    }
+    
+    private func toggleSignInButton() {
+        UIView.animate(withDuration: 0.1) {
+            self.signInButton.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+        } completion: { _ in
+            UIView.animate(withDuration: 0.16) {
+                self.signInButton.transform = CGAffineTransform(scaleX: 1, y: 1)
+            }
+        }
+
     }
     
     private func setupConstraints() {
