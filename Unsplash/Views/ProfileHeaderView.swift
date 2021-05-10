@@ -61,7 +61,7 @@ class ProfileHeaderView: UICollectionReusableView {
     private var segmentedControl: UISegmentedControl = {
         let control = UISegmentedControl(items: ["User's photos", "Liked photos"])
         control.selectedSegmentTintColor = .black
-        control.selectedSegmentIndex = 1
+        control.selectedSegmentIndex = 0
         control.translatesAutoresizingMaskIntoConstraints = false
         control.addTarget(self, action: #selector(segmentedControlValueChanged), for: .valueChanged)
         return control

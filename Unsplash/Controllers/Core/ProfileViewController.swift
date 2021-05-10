@@ -18,23 +18,38 @@ class ProfileViewController: UIViewController {
         }
     }
     
-    private var photos: [UnsplashPhoto]? {
+    private var photos: [UnsplashPhoto] = [] {
         didSet {
             DispatchQueue.main.async {
                 self.collectionView.reloadData()
+                self.collectionViewBackground()
             }
         }
     }
-     
+    
+    private var user: CurrentUserPrivateProfile?
+    
     private var collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())
+    
+    lazy var emptyStateMessageLabel: UILabel = {
+        let messageLabel = UILabel()
+        messageLabel.translatesAutoresizingMaskIntoConstraints = false
+        messageLabel.text = "No photos yet"
+        messageLabel.textColor = .gray
+        messageLabel.numberOfLines = 0
+        messageLabel.textAlignment = .center
+        messageLabel.font = UIFont.systemFont(ofSize: 20)
+        messageLabel.sizeToFit()
+        return messageLabel
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .lightGray
         
         setupCollectionView()
-        
         getUser()
+        collectionViewBackground()
     }
     
     fileprivate func setupCollectionView() {
@@ -51,19 +66,34 @@ class ProfileViewController: UIViewController {
         view.addSubview(collectionView)
     }
     
+    private func collectionViewBackground() {
+        if photos.isEmpty {
+            let mainView = UIView()
+            mainView.addSubview(emptyStateMessageLabel)
+            NSLayoutConstraint.activate([
+                emptyStateMessageLabel.centerYAnchor.constraint(equalTo: mainView.centerYAnchor),
+                emptyStateMessageLabel.centerXAnchor.constraint(equalTo: mainView.centerXAnchor)
+            ])
+            collectionView.backgroundView = mainView
+        } else {
+            collectionView.backgroundView = nil
+        }
+    }
+    
     private func getUser() {
         NetworkManager.shared.loadSingleObject(with: Route.currentUser) { (result: Result<CurrentUserPrivateProfile, Error>) in
             switch result {
             case .success(let user):
                 self.viewModel = CurrentUserPrivateProfileViewModel(currentUser: user)
-                NetworkManager.shared.loadAnArray(with: Route.usersLikedPhotos(username: user.username)) { (photoResult: Result<[UnsplashPhoto], Error>) in
-                    switch photoResult {
-                    case .success(let response):
-                        self.photos = response
-                    case .failure(let error):
-                        print(error)
+                self.user = user
+                    NetworkManager.shared.loadAnArray(with: Route.usersPhotos(username: user.username)) { (photoResult: Result<[UnsplashPhoto], Error>) in
+                        switch photoResult {
+                        case .success(let response):
+                            self.photos = response
+                        case .failure(let error):
+                            print(error)
+                        }
                     }
-                }
             case .failure(let error):
                 print("Error occured: \(error.localizedDescription), \(error)")
             }
@@ -73,7 +103,7 @@ class ProfileViewController: UIViewController {
 
 extension ProfileViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return photos?.count ?? 0
+        return photos.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -82,9 +112,7 @@ extension ProfileViewController: UICollectionViewDataSource, UICollectionViewDel
                 for: indexPath) as? ProfileCollectionViewCell else {
             fatalError("Couldn't dequeue a cell")
         }
-        guard let photo = photos?[indexPath.item] else {
-            return UICollectionViewCell()
-        }
+        let photo = photos[indexPath.item]
         cell.configure(with: photo)
         return cell
     }
@@ -105,7 +133,7 @@ extension ProfileViewController: UICollectionViewDataSource, UICollectionViewDel
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
         let vc = SinglePhotoViewController()
-        vc.photoID = photos?[indexPath.item].id
+        vc.photoID = photos[indexPath.item].id
         navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -128,6 +156,27 @@ extension ProfileViewController: UICollectionViewDelegateFlowLayout {
 
 extension ProfileViewController: ProfileHeaderViewDelegate {
     func didChangeSegmentedControlValue(_ header: ProfileHeaderView, for value: Int) {
-        print(value)
+        guard let user = user else {
+            return
+        }
+        if value == 0 {
+            NetworkManager.shared.loadAnArray(with: Route.usersPhotos(username: user.username)) { (photoResult: Result<[UnsplashPhoto], Error>) in
+                switch photoResult {
+                case .success(let response):
+                    self.photos = response
+                case .failure(let error):
+                    print(error)
+                }
+            }
+        } else if value == 1 {
+            NetworkManager.shared.loadAnArray(with: Route.usersLikedPhotos(username: user.username)) { (photoResult: Result<[UnsplashPhoto], Error>) in
+                switch photoResult {
+                case .success(let response):
+                    self.photos = response
+                case .failure(let error):
+                    print(error)
+                }
+            }
+        }
     }
 }
